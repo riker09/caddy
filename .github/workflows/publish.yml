@@ -47,6 +47,7 @@ jobs:
         run: |
           BUILDER_VERSION=${{ steps.prepare.outputs.tag }}-builder
 
+          [[ "$BUILDER_VERSION" == "latest-builder" ]] && BUILDER_VERSION=builder-latest
           [[ "$BUILDER_VERSION" == *"-alpine-builder"* ]] && BUILDER_VERSION=$(echo $BUILDER_VERSION | sed -r 's!^(.+)(-alpine)(-builder)!\1\3\2!g')
 
           docker build \
