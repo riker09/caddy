@@ -2,11 +2,11 @@ name: Docker
 
 on:
   push:
-    # Publish `main` as Docker `latest` image.
+    # Pushing to `main` branch builds image with `:latest` tag.
     branches:
       - main
 
-    # Publish `v1.2.3` tags as releases.
+    # Pushing `v1.2.3` tags builds accordingly tagged images
     tags:
       - v*
 
@@ -14,8 +14,7 @@ jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
@@ -30,9 +29,6 @@ jobs:
 
           ## Strip git ref prefix from tag
           TAG=$(echo "${{ github.event.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          echo "github.event.ref == ${{ github.event.ref }}"
-          echo "TAG == $TAG"
 
           ## Strip "v" prefix from tag name
           [[ "${{ github.event.ref }}" == "refs/tags/"* ]] && TAG=$(echo $TAG | sed -e 's/^v//')
