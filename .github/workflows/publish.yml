@@ -10,6 +10,9 @@ on:
     tags:
       - v*
 
+    paths-ignore:
+      - "*.md"
+
 jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
