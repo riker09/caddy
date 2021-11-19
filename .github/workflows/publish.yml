@@ -26,13 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME
-
-      - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
+      - name: Prepare
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository }}
 
@@ -48,6 +42,17 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
 
+      - name: Build image
+        run: docker build . \
+          --file Dockerfile \
+          --tag ${IMAGE_NAME}:${VERSION} \
+          --build-arg CADDY_VERSION=${VERSION}
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
