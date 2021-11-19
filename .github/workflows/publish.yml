@@ -47,17 +47,6 @@ jobs:
           echo "::set-output name=tag::${TAG}"
 
       - name: Build & push image
-        ## Possible tags: latest, 1.2.3
-
-        # latest
-        # OS
-        # 2.4.6
-        # 2.4.6-OS
-
-        # builder
-        # builder-OS
-        # 2.4.6-builder
-        # 2.4.6-builder-OS
         run: |
           CADDY_VERSION="${{ steps.prepare.outputs.tag }}${{ matrix.os }}"
 
