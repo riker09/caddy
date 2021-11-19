@@ -16,6 +16,10 @@ jobs:
   push:
     runs-on: ubuntu-20.04
 
+    strategy:
+      matrix:
+        os: ['', '-alpine']
+
     steps:
       - uses: actions/checkout@v2
 
@@ -40,19 +44,32 @@ jobs:
           echo "::set-output name=tag::${TAG}"
 
       - name: Build & push image
-        run: |
-          BUILDER_VERSION=${{ steps.prepare.outputs.tag }}-builder
+        ## Possible tags: latest, 1.2.3
 
-          [[ "$BUILDER_VERSION" == "latest-builder" ]] && BUILDER_VERSION=builder-latest
-          [[ "$BUILDER_VERSION" == *"-alpine-builder"* ]] && BUILDER_VERSION=$(echo $BUILDER_VERSION | sed -r 's!^(.+)(-alpine)(-builder)!\1\3\2!g')
+        # latest
+        # OS
+        # 2.4.6
+        # 2.4.6-OS
+
+        # builder
+        # builder-OS
+        # 2.4.6-builder
+        # 2.4.6-builder-OS
+        run: |
+          CADDY_VERSION="${{ steps.prepare.outputs.tag }}"
+
+          [[ "${CADDY_VERSION}" == "latest" && "${{ matrix.os }}" == "-alpine" ]] && CADDY_VERSION="alpine"
+
+          BUILDER_VERSION="${{ steps.prepare.outputs.tag }}-builder"
+          [[ "${BUILDER_VERSION}" == "latest-builder" ]] && BUILDER_VERSION="builder"
 
           docker build \
             --file Dockerfile \
-            --tag ${{ steps.prepare.outputs.img }}:${{ steps.prepare.outputs.tag }} \
-            --build-arg CADDY_VERSION=${{ steps.prepare.outputs.tag }} \
-            --build-arg BUILDER_VERSION=${BUILDER_VERSION} \
+            --tag ${{ steps.prepare.outputs.img }}:${CADDY_VERSION}${{ matrix.os }} \
+            --build-arg CADDY_VERSION=${CADDY_VERSION}${{ matrix.os }} \
+            --build-arg BUILDER_VERSION=${BUILDER_VERSION}${{ matrix.os }} \
             .
 
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-          docker push ${{ steps.prepare.outputs.img }}:${{ steps.prepare.outputs.tag }}
+          docker push ${{ steps.prepare.outputs.img }}:${CADDY_VERSION}${{ matrix.os }}
