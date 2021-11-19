@@ -56,20 +56,20 @@ jobs:
         # 2.4.6-builder
         # 2.4.6-builder-OS
         run: |
-          CADDY_VERSION="${{ steps.prepare.outputs.tag }}"
+          CADDY_VERSION="${{ steps.prepare.outputs.tag }}${{ matrix.os }}"
 
-          [[ "${CADDY_VERSION}" == "latest" && "${{ matrix.os }}" == "-alpine" ]] && CADDY_VERSION="alpine"
+          [[ "${CADDY_VERSION}" == "latest-alpine" ]] && CADDY_VERSION="alpine"
 
           BUILDER_VERSION="${{ steps.prepare.outputs.tag }}-builder"
           [[ "${BUILDER_VERSION}" == "latest-builder" ]] && BUILDER_VERSION="builder"
 
           docker build \
             --file Dockerfile \
-            --tag ${{ steps.prepare.outputs.img }}:${CADDY_VERSION}${{ matrix.os }} \
-            --build-arg CADDY_VERSION=${CADDY_VERSION}${{ matrix.os }} \
+            --tag ${{ steps.prepare.outputs.img }}:${CADDY_VERSION} \
+            --build-arg CADDY_VERSION=${CADDY_VERSION} \
             --build-arg BUILDER_VERSION=${BUILDER_VERSION}${{ matrix.os }} \
             .
 
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-          docker push ${{ steps.prepare.outputs.img }}:${CADDY_VERSION}${{ matrix.os }}
+          docker push ${{ steps.prepare.outputs.img }}:${CADDY_VERSION}
