@@ -17,14 +17,14 @@ jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        os: ['', '-alpine']
+        os: ["", "-alpine"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Prepare
         id: prepare
@@ -43,8 +43,8 @@ jobs:
           ## Use Docker `latest` tag convention
           [ "$TAG" == "main" ] && TAG=latest
 
-          echo "::set-output name=img::${FULL_IMAGE_NAME}"
-          echo "::set-output name=tag::${TAG}"
+          echo "{img}={${FULL_IMAGE_NAME}}" >> $GITHUB_OUTPUT
+          echo "{tag}={${TAG}}" >> $GITHUB_OUTPUT
 
       - name: Build & push image
         run: |
